@@ -1,0 +1,32 @@
+Colony is a small library that implements a simple thread pool in C.
+
+API
+===
+
+It's designed to be really simple to use. There are three functions:
+
+    thread_pool *thread_pool_new(unsigned short n);
+
+Creates a new thread pool with n threads.
+
+    void thread_pool_run(thread_pool *, void (*func)(void *), void *data);
+
+Runs a function on the thread pool (asynchronously) giving data as the 
+argument. This function is thread-safe. It returns once the function has been 
+started in the pool.
+
+    void thread_pool_free(thread_pool *pool);
+
+Frees the thread pool. If there are functions running, it waits until they 
+complete. If you call thread_pool_run during or after a call to this function
+then you'll be on the business end of undefined behaviour.
+
+Build instructions
+==================
+
+From inside the project directory:
+
+$ mkdir build
+$ cd build
+$ cmake ../
+$ make
