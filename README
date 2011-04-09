@@ -11,9 +11,9 @@ Creates a new thread pool with n threads.
 
     void thread_pool_run(thread_pool *, void (*func)(void *), void *data);
 
-Runs a function on the thread pool (asynchronously) giving data as the 
-argument. This function is thread-safe. It returns once the function has been 
-started in the pool.
+Runs a function on the thread pool, giving data as the argument. This function 
+is thread-safe. It blocks until the function can be started in the pool. To 
+reiterate, this library doesn't implement a queue.
 
     void thread_pool_free(thread_pool *pool);
 
