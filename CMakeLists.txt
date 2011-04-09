@@ -28,8 +28,8 @@ TARGET_LINK_LIBRARIES(colony pthread)
 ADD_LIBRARY(colony_static STATIC ${ColonySources})
 SET_TARGET_PROPERTIES(colony_static PROPERTIES LINKER_LANGUAGE C)
 
-SET(UnittestSources tests/colony_test)
+SET(ColonyTestSources tests/colony_test)
 
-ADD_EXECUTABLE(test tests.c ${UnittestSources})
-TARGET_LINK_LIBRARIES(test colony check)
+ADD_EXECUTABLE(colony_test tests.c ${ColonyTestSources})
+TARGET_LINK_LIBRARIES(colony_test colony check)
 
