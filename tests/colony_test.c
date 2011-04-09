@@ -18,20 +18,28 @@
 */
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "colony_test.h"
 #include "colony.h"
 
 void test_function(void *arg) {
-    printf("%s\n", (const char *)arg);
+    bool *ret = arg;
+    *ret = true;
 }
 
 START_TEST(test_1) {
     thread_pool *pool = thread_pool_new(2);
     
-    thread_pool_run(pool, test_function, "hello world1");
+    bool a=false, b=false;
+    
+    thread_pool_run(pool, test_function, &a);
+    thread_pool_run(pool, test_function, &b);
     
     thread_pool_free(pool);
+    
+    fail_unless(a, NULL);
+    fail_unless(b, NULL);
 } END_TEST
 
 TCase *colony_test_case() {

@@ -54,6 +54,7 @@ void *pool_thread(void *arg) {
         void *data = (void *)pool->data;
         
         pool->func = NULL;
+        pthread_cond_signal(&pool->cnd);
         
         pthread_mutex_unlock(&pool->mut);
         
@@ -104,6 +105,10 @@ void thread_pool_run(thread_pool *pool, void (*func)(void *), void *data) {
 
 void thread_pool_free(thread_pool *pool) {
     pthread_mutex_lock(&pool->mut);
+    
+    while (pool->func != NULL) {
+        pthread_cond_wait(&pool->cnd, &pool->mut);
+    }
     
     pool->quit = true;
     
