@@ -54,15 +54,13 @@ void *pool_thread(void *arg) {
         void *data = (void *)pool->data;
         
         pool->func = NULL;
-        pthread_cond_signal(&pool->cnd);
-        
-        pthread_mutex_unlock(&pool->mut);
+        pthread_cond_broadcast(&pool->cnd);
         
         if (func != NULL) {
+            pthread_mutex_unlock(&pool->mut);
             func(data);
+            pthread_mutex_lock(&pool->mut);
         }
-        
-        pthread_mutex_lock(&pool->mut);
     }
     pthread_mutex_unlock(&pool->mut);
     return NULL;
@@ -91,6 +89,8 @@ thread_pool *thread_pool_new(unsigned short n) {
 
 void thread_pool_run(thread_pool *pool, void (*func)(void *), void *data) {
     pthread_mutex_lock(&pool->mut);
+    
+    /* wait until the job can be posted */
     while (pool->func != NULL) {
         pthread_cond_wait(&pool->cnd, &pool->mut);
     }
@@ -98,7 +98,7 @@ void thread_pool_run(thread_pool *pool, void (*func)(void *), void *data) {
     pool->func = func;
     pool->data = data;
     
-    pthread_cond_signal(&pool->cnd);
+    pthread_cond_broadcast(&pool->cnd);
     
     pthread_mutex_unlock(&pool->mut);
 }
@@ -106,6 +106,7 @@ void thread_pool_run(thread_pool *pool, void (*func)(void *), void *data) {
 void thread_pool_free(thread_pool *pool) {
     pthread_mutex_lock(&pool->mut);
     
+    /* this ensures that all current jobs have started */
     while (pool->func != NULL) {
         pthread_cond_wait(&pool->cnd, &pool->mut);
     }
@@ -115,6 +116,7 @@ void thread_pool_free(thread_pool *pool) {
     pthread_cond_broadcast(&pool->cnd);
     pthread_mutex_unlock(&pool->mut);
     
+    /* wait for all current jobs to finish */
     int i;
     for (i = 0; i < pool->n; ++i) {
         pthread_join(pool->threads[i], NULL);
