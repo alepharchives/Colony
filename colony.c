@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "colony.h"
 
@@ -89,6 +90,9 @@ thread_pool *thread_pool_new(unsigned short n) {
 
 void thread_pool_run(thread_pool *pool, void (*func)(void *), void *data) {
     pthread_mutex_lock(&pool->mut);
+    while (pool->func != NULL) {
+        pthread_cond_wait(&pool->cnd, &pool->mut);
+    }
     
     pool->func = func;
     pool->data = data;
