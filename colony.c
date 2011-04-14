@@ -54,9 +54,9 @@ void *pool_thread(void *arg) {
         void *data = (void *)pool->data;
         
         pool->func = NULL;
-        pthread_cond_broadcast(&pool->cnd);
         
         if (func != NULL) {
+            pthread_cond_broadcast(&pool->cnd);
             pthread_mutex_unlock(&pool->mut);
             func(data);
             pthread_mutex_lock(&pool->mut);
